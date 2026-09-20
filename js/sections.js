@@ -567,11 +567,17 @@ function ContactSection({ name, mode, isDark }) {
   const cfg = MODES[mode];
   const ref = useReveal();
   const [hov, setHov] = useState(null);
+  // Real destinations. These were all href='#' — four rows that looked like
+  // contact details and led nowhere, which is worse than listing fewer.
+  // read.cv and Twitter were dropped rather than left pointing at nothing.
   const links = [
-    { label:'EMAIL',   val:`hello@${name}.com`,  href:'#' },
-    { label:'GITHUB',  val:`github.com/${name}`, href:'#' },
-    { label:'TWITTER', val:`@${name}`,           href:'#' },
-    { label:'READ.CV', val:`read.cv/${name}`,    href:'#' },
+    { label:'EMAIL',   val:'hello@mr5am.com',      href:'mailto:hello@mr5am.com' },
+    { label:'GITHUB',  val:'github.com/mr5am',     href:'https://github.com/mr5am' },
+    { label:'TIKTOK',  val:'@mr5am0',              href:'https://www.tiktok.com/@mr5am0' },
+    // Kept as a domain, not "Tarot Note · 塔羅筆記": this row renders in Bebas
+    // Neue, which has no CJK glyphs, so the Chinese would drop to a fallback
+    // face mid-line. Every other row is a handle or domain anyway.
+    { label:'APP',     val:'tarot-note.mr5am.com', href:'https://tarot-note.mr5am.com/' },
   ];
   const heading = isDark ? '#f0ece4' : '#111';
   return (
@@ -587,6 +593,8 @@ function ContactSection({ name, mode, isDark }) {
         <div>
           {links.map((l,i) => (
             <a key={i} href={l.href}
+              target={l.href.startsWith('http') ? '_blank' : undefined}
+              rel={l.href.startsWith('http') ? 'noopener noreferrer' : undefined}
               onMouseEnter={() => setHov(i)} onMouseLeave={() => setHov(null)}
               style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'17px 0', borderBottom:`1px solid ${tx(cfg.acc+'18',cfg.acc+'28',isDark)}`, textDecoration:'none', transition:'transform .22s', transform:hov===i?'translateX(14px)':'none' }}
             >

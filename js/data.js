@@ -87,7 +87,13 @@ const MODES = {
 /* ── Theme helper ────────────────────────────────────────────────────────── */
 const tx = (dark, light, isDark) => isDark ? dark : light;
 
-/* ── Works data ──────────────────────────────────────────────────────────── */
+/* ── Works data ──────────────────────────────────────────────────────────────
+   Optional per-work fields, all safely absent on older entries:
+     link      — real destination for the overlay CTA. Without it the CTA is
+                 hidden rather than rendered as a dead '#'.
+     linkLabel — CTA text; defaults to VIEW STUDY.
+     blurb     — a short paragraph in the overlay. Shipped products need more
+                 than a title and a medium; art studies are fine without one. */
 const WORKS_RAW = [
   { id:1, title:'Torii Garden',        type:'Generative Art',   year:'2025', tag:'ART',   jp:'鳥居の庭', img:WORLD_ART.bloom[0],   video:null, worlds:['bloom','reclaim'] },
   { id:2, title:'Below & Above',       type:'Generative Art',   year:'2025', tag:'ART',   jp:'水面',     img:WORLD_ART.bloom[3],   video:null, worlds:['reclaim','beyond'] },
@@ -98,6 +104,10 @@ const WORKS_RAW = [
   { id:7, title:'Pulse Engine',        type:'Generative Music', year:'2023', tag:'MUSIC', jp:'脈動',     img:null,        video:null, worlds:['core']            },
   { id:8, title:'From Orbit',          type:'Generative Art',   year:'2025', tag:'ART',   jp:'軌道から', img:WORLD_ART.beyond[1],  video:null, worlds:['beyond']          },
   { id:9, title:'E.V.A.',              type:'Generative Art',   year:'2025', tag:'ART',   jp:'船外活動', img:WORLD_ART.beyond[0],  video:null, worlds:['beyond']          },
+  { id:10, title:'Tarot Note',         type:'iOS App · React Native · SQLite', year:'2026', tag:'APP', jp:'タロットノート',
+    img:'assets/image/works/tarot-note-cover.webp', video:null, worlds:['beyond','bloom'],
+    link:'https://tarot-note.mr5am.com/', linkLabel:'VISIT SITE ↗',
+    blurb:'A Traditional Chinese tarot journal for people who read for others. Every draw records who it was for, the spread, upright or reversed, and how it was read — then comes back by name months later. The deck is a real 3D object: shuffled by hand or on the table, cut, drawn, and turned one card at a time. Everything stays on the device; there is no account, no sync, and no tracking.' },
 ];
 const WORKS = [...WORKS_RAW].sort((a,b) =>
   Math.sin(VISIT_SEED*a.id*9301+49297) - Math.sin(VISIT_SEED*b.id*9301+49297)
