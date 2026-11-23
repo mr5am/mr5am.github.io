@@ -13,12 +13,17 @@ function LoadingScreen({ mode, isDark, onDone }) {
   const [phase, setPhase] = useState(0);
   const name = 'MR5AM';
   const heroSrc = ART_IMGS[VISIT_SEED % ART_IMGS.length];
+  // First view in a tab gets the full sequence; reloads and back-navigation
+  // get the same choreography compressed, so the site never feels gated.
+  const quick = useRef(loaderSeenThisSession()).current;
+  const T = quick ? [40, 820, 1250, 1600] : [300, 2200, 3200, 3600];
 
   useEffect(() => {
-    const t1 = setTimeout(() => setPhase(1), 300);
-    const t2 = setTimeout(() => setPhase(2), 2200); // bars close
-    const t3 = setTimeout(() => setPhase(3), 3200); // bars open through
-    const t4 = setTimeout(onDone, 3600);
+    markLoaderSeen();
+    const t1 = setTimeout(() => setPhase(1), T[0]);
+    const t2 = setTimeout(() => setPhase(2), T[1]); // bars close
+    const t3 = setTimeout(() => setPhase(3), T[2]); // bars open through
+    const t4 = setTimeout(onDone, T[3]);
     return () => [t1,t2,t3,t4].forEach(clearTimeout);
   }, []);
 
@@ -71,7 +76,7 @@ function LoadingScreen({ mode, isDark, onDone }) {
             <div style={{
               position:'absolute', top:0, left:0, height:'100%', background:cfg.acc,
               width: phase >= 1 ? '100%' : '0%',
-              transition:'width 1.6s cubic-bezier(.22,1,.36,1) 0.3s',
+              transition:`width ${quick ? '.6s' : '1.6s'} cubic-bezier(.22,1,.36,1) ${quick ? '.05s' : '0.3s'}`,
               boxShadow:`0 0 8px ${cfg.acc}`,
             }} />
           </div>
@@ -103,25 +108,55 @@ function LoadingScreen({ mode, isDark, onDone }) {
   );
 }
 
+/* ── Section label ─────────────────────────────────────────────────────────
+   One eyebrow for every section: number, name, and a hairline rule that
+   fades into the accent. Replaces the ad-hoc "003 / ABOUT_" strings. */
+function SectionLabel({ n, label, cfg, center = false, style }) {
+  const rule = <span className="section-label-rule" style={{ background:`linear-gradient(90deg, ${cfg.acc}66, transparent)` }} />;
+  return (
+    <div className={`section-label${center ? ' is-center' : ''}`} style={{ color:cfg.acc, ...style }}>
+      {center && <span className="section-label-rule is-left" style={{ background:`linear-gradient(270deg, ${cfg.acc}66, transparent)` }} />}
+      <span>{n} / {label} —</span>
+      {rule}
+    </div>
+  );
+}
+
 /* ── Nav ─────────────────────────────────────────────────────────────────────── */
+const NAV_SECTIONS = ['games', 'work', 'about', 'contact'];
+
 function Nav({ name, mode, onAnchor, onHome, isDark, setIsDark, isHome }) {
   const cfg = MODES[mode];
   const [sc, setSc] = useState(false);
   const [activeSection, setActiveSection] = useState(null);
+  const progressRef = useRef();
+
+  // Scroll state + reading-progress hairline, both driven off one rAF-throttled
+  // listener; progress writes straight to the DOM so it never re-renders Nav.
   useEffect(() => {
-    const fn = () => setSc(window.scrollY > 50);
-    window.addEventListener('scroll', fn);
-    return () => window.removeEventListener('scroll', fn);
+    let raf = null;
+    const update = () => {
+      raf = null;
+      const y = window.scrollY;
+      setSc(y > 50);
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const p = max > 0 ? Math.min(1, Math.max(0, y / max)) : 0;
+      if (progressRef.current) progressRef.current.style.transform = `scaleX(${p})`;
+    };
+    const onScroll = () => { if (raf === null) raf = requestAnimationFrame(update); };
+    update();
+    window.addEventListener('scroll', onScroll, { passive:true });
+    window.addEventListener('resize', onScroll);
+    return () => { if (raf !== null) cancelAnimationFrame(raf); window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onScroll); };
   }, []);
 
   useEffect(() => {
     if (!isHome) { setActiveSection(null); return; }
-    const ids = ['about','contact'];
-    const els = ids.map(id => document.getElementById(id)).filter(Boolean);
+    const els = NAV_SECTIONS.map(id => document.getElementById(id)).filter(Boolean);
     if (els.length === 0) return;
     const observer = new IntersectionObserver((entries) => {
       const visible = entries.filter(e => e.isIntersecting);
-      if (visible.length === 0) { setActiveSection(null); return; }
+      if (visible.length === 0) return;
       // Pick the one closest to the top of the viewport (smallest top offset).
       visible.sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
       setActiveSection(visible[0].target.id);
@@ -135,11 +170,9 @@ function Nav({ name, mode, onAnchor, onHome, isDark, setIsDark, isHome }) {
   const linkColor = isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.4)';
 
   return (
-    <nav style={{
-      position:'fixed', top:0, left:0, right:0, zIndex:100,
-      padding:'14px 32px', display:'flex', alignItems:'center', justifyContent:'space-between',
+    <nav className="site-nav" aria-label="Primary" style={{
       background:navBg, backdropFilter:sc?'blur(14px)':'none',
-      borderBottom:`1px solid ${sc?cfg.acc+'28':'transparent'}`, transition:'all .4s',
+      borderBottom:`1px solid ${sc?cfg.acc+'28':'transparent'}`,
     }}>
       <a
         href="/"
@@ -150,12 +183,12 @@ function Nav({ name, mode, onAnchor, onHome, isDark, setIsDark, isHome }) {
             onHome();
           }
         }}
-        style={{ fontFamily:'Space Mono', fontSize:11, color:cfg.acc, letterSpacing:'.14em', textDecoration:'none' }}
+        style={{ fontFamily:'Space Mono', fontSize:11, color:cfg.acc, letterSpacing:'.14em', textDecoration:'none', whiteSpace:'nowrap' }}
       >
-        {name}<span style={{ color:textFade }}> / {new Date().getFullYear()}</span>
+        {name}<span className="nav-year" style={{ color:textFade }}> / {new Date().getFullYear()}</span>
       </a>
 
-      <div style={{ display:'flex', gap:18, alignItems:'center' }}>
+      <div className="nav-links">
         {!isHome && (
           <a
             href="/"
@@ -166,11 +199,8 @@ function Nav({ name, mode, onAnchor, onHome, isDark, setIsDark, isHome }) {
                 onHome();
               }
             }}
-            style={{
-              fontFamily:'Space Mono', fontSize:9, letterSpacing:'.14em', textTransform:'uppercase',
-              color:cfg.acc, textDecoration:'none', border:`1px solid ${cfg.acc}44`,
-              padding:'7px 12px', background:`${cfg.acc}10`, transition:'border-color .2s, background .2s',
-            }}
+            className="nav-home"
+            style={{ color:cfg.acc, border:`1px solid ${cfg.acc}44`, background:`${cfg.acc}10` }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = cfg.acc; e.currentTarget.style.background = `${cfg.acc}20`; }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = `${cfg.acc}44`; e.currentTarget.style.background = `${cfg.acc}10`; }}
           >
@@ -180,27 +210,26 @@ function Nav({ name, mode, onAnchor, onHome, isDark, setIsDark, isHome }) {
         <button onClick={() => setIsDark(d => !d)} title={isDark?'Day mode':'Night mode'}
           aria-label={isDark?'Switch to day mode':'Switch to night mode'}
           aria-pressed={!isDark}
-          style={{
-            width:28, height:28, borderRadius:'50%', cursor:'pointer',
-            border:`1px solid ${cfg.acc}44`, background:isDark?cfg.acc+'18':cfg.acc+'22',
-            color:cfg.acc, fontSize:13, display:'flex', alignItems:'center', justifyContent:'center', transition:'all .25s',
-          }}>
+          className="theme-toggle"
+          style={{ border:`1px solid ${cfg.acc}44`, background:isDark?cfg.acc+'18':cfg.acc+'22', color:cfg.acc }}>
           {isDark ? '☀' : '☾'}
         </button>
-        {['about','contact'].map(s => {
+        {NAV_SECTIONS.map(s => {
           const isActive = activeSection === s;
           const baseColor = isActive ? cfg.acc : linkColor;
           return (
-            <a key={s} href={`#${s}`} style={{
-              fontFamily:'Space Mono', fontSize:9, letterSpacing:'.14em', textTransform:'uppercase',
-              color:baseColor, textDecoration:'none', transition:'color .2s',
-            }}
-            onClick={e => { if (typeof onAnchor === 'function') { e.preventDefault(); onAnchor(s); } }}
-            onMouseEnter={e => e.target.style.color = cfg.acc}
-            onMouseLeave={e => e.target.style.color = baseColor}
+            <a key={s} href={`#${s}`} className={`nav-link${isActive ? ' is-active' : ''}`}
+              aria-current={isActive ? 'location' : undefined}
+              style={{ color:baseColor, ['--acc']: cfg.acc }}
+              onClick={e => { if (typeof onAnchor === 'function') { e.preventDefault(); onAnchor(s); } }}
+              onMouseEnter={e => e.currentTarget.style.color = cfg.acc}
+              onMouseLeave={e => e.currentTarget.style.color = baseColor}
             >{s}</a>
           );
         })}
+      </div>
+      <div className="scroll-progress" aria-hidden="true">
+        <div ref={progressRef} className="scroll-progress-bar" style={{ background:cfg.acc, boxShadow:`0 0 6px ${cfg.acc}88` }} />
       </div>
     </nav>
   );

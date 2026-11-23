@@ -1,5 +1,6 @@
 /* ── World State Selector ───────────────────────────────────────────────── */
-function WorldStateSelector({ isDark, onSelectRoute }) {
+function WorldStateSelector({ isDark, mode, onSelectRoute }) {
+  const cfg = MODES[mode] || MODES.bloom;
   const [hoveredKey, setHoveredKey] = useState(null);
   const [focusedKey, setFocusedKey] = useState(null);
   const videoRefs = useRef({});
@@ -25,8 +26,9 @@ function WorldStateSelector({ isDark, onSelectRoute }) {
   }, [hoveredKey, focusedKey]);
 
   return (
-    <section style={{ padding:'92px 32px 84px', borderTop:'1px solid rgba(255,255,255,0.08)' }}>
+    <section id="worlds" className="anchor-target" style={{ padding:'92px 32px 84px', borderTop:`1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.1)'}` }}>
       <div style={{ maxWidth:1200, margin:'0 auto' }}>
+        <SectionLabel n="001" label="WORLD STATES" cfg={cfg} center style={{ color: isDark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.5)', marginBottom:22 }} />
         <h2 style={{ fontFamily:'Bebas Neue', fontSize:'clamp(52px,7vw,110px)', lineHeight:.9, letterSpacing:'.03em', textAlign:'center', color:isDark ? '#f0ece4' : '#1a1a1a' }}>
           Enter a Visual State
         </h2>
@@ -58,7 +60,8 @@ function WorldStateSelector({ isDark, onSelectRoute }) {
                 style={{
                   position:'relative',
                   minHeight:'clamp(200px,28vw,360px)',
-                  border:`1px solid ${active ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.18)'}`,
+                  border:`1px solid ${active ? MODES[card.key].acc : 'rgba(255,255,255,0.18)'}`,
+                  boxShadow: active ? `0 18px 48px rgba(0,0,0,.45), 0 0 0 1px ${MODES[card.key].acc}33` : '0 0 0 rgba(0,0,0,0)',
                   borderRadius:6,
                   overflow:'hidden',
                   background:'#111',
@@ -66,10 +69,10 @@ function WorldStateSelector({ isDark, onSelectRoute }) {
                   padding:0,
                   cursor:'pointer',
                   transform:active ? 'scale(1.02)' : 'scale(1)',
-                  transition:'transform .24s ease, border-color .24s ease',
+                  transition:'transform .24s ease, border-color .24s ease, box-shadow .3s ease',
                 }}
               >
-                <img
+                <FadeImg
                   src={card.heroImg}
                   alt=""
                   aria-hidden="true"
@@ -79,7 +82,6 @@ function WorldStateSelector({ isDark, onSelectRoute }) {
                     inset:0,
                     ['--zoom-hover']:'1.06',
                     filter:active ? 'contrast(1.14) brightness(.9) saturate(1.05)' : 'contrast(1.03) brightness(.72) saturate(.8)',
-                    transition:'filter .24s ease',
                   }}
                 />
                 {hoverVideo && (
@@ -296,7 +298,7 @@ function WorldStatePage({ worldKey, isDark, onNavigate }) {
         <section style={{ borderTop:`1px solid ${tx(cfg.acc+'18',cfg.acc+'28',isDark)}` }}>
           <div style={{ padding:'72px 32px 24px' }}>
             <div style={{ fontFamily:'Space Mono', fontSize:10, color:cfg.acc, letterSpacing:'.2em', textTransform:'uppercase', marginBottom:14 }}>
-              Archive · {String(worldWorks.length).padStart(2,'0')} studies in {meta.label}
+              Archive · {String(worldWorks.length).padStart(2,'0')} works in {meta.label}
             </div>
             <h2 style={{ fontFamily:'Bebas Neue', fontSize:'clamp(48px,7vw,96px)', lineHeight:.9, letterSpacing:'.03em', margin:0, color:baseText }}>
               STUDIES FROM<br /><span style={{ color:cfg.acc }}>THIS STATE.</span>
@@ -312,7 +314,7 @@ function WorldStatePage({ worldKey, isDark, onNavigate }) {
 
       {/* Prev / Home / Next nav */}
       <section style={{ borderTop:`1px solid ${tx(cfg.acc+'18',cfg.acc+'28',isDark)}` }}>
-        <div style={{ maxWidth:1200, margin:'0 auto', padding:'40px 32px 72px', display:'grid', gridTemplateColumns:'1fr auto 1fr', gap:12, alignItems:'center' }}>
+        <div className="world-nav-grid" style={{ maxWidth:1200, margin:'0 auto', padding:'40px 32px 72px' }}>
           <a
             href={`/${prevKey}`}
             aria-label={`Previous: ${WORLD_ROUTE_META[prevKey].label}`}
@@ -456,17 +458,18 @@ function AboutSection({ name, mode, isDark }) {
   const border = tx(`${cfg.acc}14`,`${cfg.acc}22`,isDark);
   const sub = tx('rgba(255,255,255,0.25)','rgba(0,0,0,0.4)',isDark);
   const skills = [
+    { en:'GAMES',          jp:'ゲーム',   sub:'Godot 4 · React · iPhone & Web' },
+    { en:'APPS',           jp:'アプリ',   sub:'React Native · SQLite · StoreKit' },
     { en:'GENERATIVE ART', jp:'生成芸術', sub:'Canvas · GLSL · Three.js · p5.js' },
     { en:'ANIME / VIDEO',  jp:'アニメ',   sub:'AE · Blender · AI animation' },
     { en:'MUSIC',          jp:'音楽',     sub:'Suno · Generative composition' },
-    { en:'GAMES',          jp:'ゲーム',   sub:'Unity · Godot · Experimental' },
     { en:'WEB',            jp:'ウェブ',   sub:'React · Node · Full-stack' },
   ];
   return (
-    <section id="about" style={{ padding:'80px 32px', borderTop:`1px solid ${tx(cfg.acc+'18',cfg.acc+'28',isDark)}` }}>
+    <section id="about" className="anchor-target" style={{ padding:'80px 32px', borderTop:`1px solid ${tx(cfg.acc+'18',cfg.acc+'28',isDark)}` }}>
       <div ref={ref} className="rv">
-        <div style={{ fontFamily:'Space Mono', fontSize:10, color:cfg.acc, letterSpacing:'.2em', textTransform:'uppercase', marginBottom:48 }}>003 / ABOUT_</div>
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'60px 80px', alignItems:'start' }}>
+        <SectionLabel n="004" label="ABOUT" cfg={cfg} style={{ marginBottom:48 }} />
+        <div className="about-grid">
           <div>
             <h2 style={{ fontFamily:'Bebas Neue', fontSize:'clamp(52px,6vw,96px)', lineHeight:.9, letterSpacing:'.02em', color:heading, marginBottom:20 }}>
               WORLDS<br />MADE<br /><span style={{ color:cfg.acc }}>BY HAND.</span>
@@ -477,6 +480,9 @@ function AboutSection({ name, mode, isDark }) {
             </p>
             <p style={{ fontFamily:'Space Mono', fontSize:11, color:body, lineHeight:2 }}>
               The work begins with a feeling: a garden after rain, a city humming at night, a ruin becoming green again. Each image is composed to feel lived in, not simply rendered.
+            </p>
+            <p style={{ fontFamily:'Space Mono', fontSize:11, color:body, lineHeight:2, marginTop:14 }}>
+              Right now most of that energy goes into games, each built end to end: design, art direction, code, sound, and the store listing. More are coming.
             </p>
           </div>
           <div>
@@ -581,9 +587,9 @@ function ContactSection({ name, mode, isDark }) {
   ];
   const heading = isDark ? '#f0ece4' : '#111';
   return (
-    <section id="contact" style={{ padding:'80px 32px', borderTop:`1px solid ${tx(cfg.acc+'18',cfg.acc+'28',isDark)}` }}>
+    <section id="contact" className="anchor-target" style={{ padding:'80px 32px', borderTop:`1px solid ${tx(cfg.acc+'18',cfg.acc+'28',isDark)}` }}>
       <div ref={ref} className="rv">
-        <div style={{ fontFamily:'Space Mono', fontSize:10, color:cfg.acc, letterSpacing:'.2em', textTransform:'uppercase', marginBottom:24 }}>006 / CONTACT_</div>
+        <SectionLabel n="005" label="CONTACT" cfg={cfg} style={{ marginBottom:24 }} />
         <h2 style={{ fontFamily:'Bebas Neue', fontSize:'clamp(72px,10vw,160px)', lineHeight:.88, letterSpacing:'.02em', marginBottom:56, color:heading }}>
           REACH<br /><span style={{ WebkitTextStroke:`1px ${cfg.acc}`, color:'transparent' }}>OUT_</span>
         </h2>
@@ -646,5 +652,107 @@ function TweaksPanel({ visible, tweaks, setTweaks, mode, setMode, isDark, setIsD
         ))}
       </div>
     </div>
+  );
+}
+
+/* ── Game Card (home showcase) ──────────────────────────────────────────── */
+function GameCard({ game, cfg, isDark, index, onOpen }) {
+  const ref = useReveal('-60px');
+  const [hov, setHov] = useState(false);
+  const open = () => onOpen(game);
+  const links = workLinks(game).slice(0, 2);
+  return (
+    <article ref={ref}
+      // Hover lives in a data attribute, not className: useReveal adds .in
+      // straight to the DOM, and a React className update would wipe it,
+      // dropping the card back to the hidden .rv state.
+      className="rv game-card"
+      data-hover={hov ? 'true' : undefined}
+      role="button" tabIndex={0}
+      aria-label={`${game.title}, ${game.status.toLowerCase()}. ${game.tagline} Open details`}
+      onClick={open}
+      onKeyDown={onActivateKey(open)}
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      onFocus={() => setHov(true)}
+      onBlur={() => setHov(false)}
+      style={{ transitionDelay:`${index * 90}ms`, ['--card-acc']: cfg.acc }}
+    >
+      <div className="game-card-media">
+        <FadeImg src={game.cover} alt={`${game.title} on iPhone`} className="game-card-img" style={{ objectPosition: game.coverPos || 'top center' }} />
+        <div className="game-card-shade" />
+        <div className="game-card-top">
+          <StatusChip status={game.status} acc={cfg.acc} />
+          <span className="game-card-num">{String(index + 1).padStart(2, '0')}</span>
+        </div>
+      </div>
+      <div className="game-card-body">
+        <div className="game-card-head">
+          <img src={game.icon} alt="" width="44" height="44" className="game-card-icon" loading="lazy" decoding="async" />
+          <div>
+            <h3 className="game-card-title">{game.title}</h3>
+            <div className="game-card-jp" style={{ color:`${cfg.acc}aa` }}>{game.jp}</div>
+          </div>
+        </div>
+        <p className="game-card-tagline">{game.tagline}</p>
+        <dl className="game-card-meta">
+          <div><dt>Platform</dt><dd>{game.platform}</dd></div>
+          <div><dt>Engine</dt><dd>{game.engine}</dd></div>
+          <div className="span-2"><dt>Where it is</dt><dd>{game.phase}</dd></div>
+        </dl>
+        <div className="game-card-actions">
+          {links.map((l, i) => (
+            <a key={l.href} href={l.href} target="_blank" rel="noopener noreferrer"
+              className={`game-link${i === 0 ? ' is-primary' : ''}`}
+              onClick={e => e.stopPropagation()}
+              style={{ color: i === 0 ? '#000' : cfg.acc, background: i === 0 ? cfg.acc : 'transparent', borderColor: i === 0 ? cfg.acc : `${cfg.acc}66` }}
+            >{l.label}</a>
+          ))}
+          <span className="game-more">DETAILS <span style={{ color:cfg.acc }}>→</span></span>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+/* ── Games Showcase ─────────────────────────────────────────────────────── */
+function GamesShowcase({ mode, isDark }) {
+  const cfg = MODES[mode];
+  const ref = useReveal();
+  const [activeWork, setActiveWork] = useState(null);
+  const heading = isDark ? '#f0ece4' : '#111';
+  return (
+    <section id="games" className="anchor-target games-section" style={{
+      padding:'96px 32px 84px',
+      borderTop:`1px solid ${tx(cfg.acc+'18',cfg.acc+'28',isDark)}`,
+      ['--fg']: heading,
+      ['--fg-dim']: tx('rgba(255,255,255,0.5)','rgba(0,0,0,0.58)',isDark),
+      ['--fg-faint']: tx('rgba(255,255,255,0.28)','rgba(0,0,0,0.4)',isDark),
+      ['--card-bg']: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.035)',
+      ['--card-border']: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.12)',
+      ['--card-glow']: `rgba(${cfg.rgb.join(',')},0.22)`,
+    }}>
+      <div ref={ref} className="rv">
+        <SectionLabel n="002" label="NOW BUILDING" cfg={cfg} />
+        <div className="section-head">
+          <h2 style={{ fontFamily:'Bebas Neue', fontSize:'clamp(52px,7vw,108px)', lineHeight:.92, letterSpacing:'.02em', color:heading }}>
+            GAMES<br /><span style={{ WebkitTextStroke:`1px ${cfg.acc}`, color:'transparent' }}>IN THE MAKING</span>
+          </h2>
+          <div style={{ textAlign:'right' }}>
+            <div style={{ fontFamily:'Space Mono', fontSize:9, color:'var(--fg-faint)', letterSpacing:'.12em' }}>{GAMES.length} IN PROGRESS · MORE COMING</div>
+            <div style={{ fontFamily:'Noto Sans JP', fontWeight:900, fontSize:13, color:`${cfg.acc}55`, marginTop:2 }}>開発中</div>
+          </div>
+        </div>
+        <p style={{ marginTop:14, maxWidth:640, fontFamily:'Space Mono', fontSize:11, lineHeight:1.9, color:'var(--fg-dim)' }}>
+          Games built solo from first sketch to store listing: cozy creature puzzles, satirical idle empires, pocket-sized digs into the deep, and more on the way.
+        </p>
+        <div className="games-grid">
+          {GAMES.map((g, i) => (
+            <GameCard key={g.id} game={g} cfg={cfg} isDark={isDark} index={i} onOpen={setActiveWork} />
+          ))}
+        </div>
+      </div>
+      {activeWork && <ProjectOverlay work={activeWork} cfg={cfg} isDark={isDark} onClose={() => setActiveWork(null)} />}
+    </section>
   );
 }

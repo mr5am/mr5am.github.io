@@ -108,10 +108,70 @@ const WORKS_RAW = [
     img:'assets/image/works/tarot-note-cover.webp', video:null, worlds:['beyond','bloom'],
     link:'https://tarot-note.mr5am.com/', linkLabel:'VISIT SITE ↗',
     blurb:'A Traditional Chinese tarot journal for people who read for others. Every draw records who it was for, the spread, upright or reversed, and how it was read — then comes back by name months later. The deck is a real 3D object: shuffled by hand or on the table, cut, drawn, and turned one card at a time. Everything stays on the device; there is no account, no sync, and no tracking.' },
+
+  /* ── Games in development ──────────────────────────────────────────────
+     Real projects with live sites; more will be added over time. Extra fields, all optional:
+       cover    — portrait store capture, used by the home "Now Building" cards
+       coverPos — object-position for that cover, so the crop lands on the art, not the HUD
+       icon     — app icon, shown as a badge on the card and in the overlay
+       status   — short chip text (IN DEVELOPMENT / EARLY ACCESS …)
+       phase    — one honest line on where the build actually is
+       tagline  — the game's own one-liner
+       platform / engine — meta row
+       links    — ordered real destinations; the first is the primary CTA */
+  { id:11, title:'EVOLVO', type:'iPhone Game · Godot 4 · Creature Puzzle', year:'2026', tag:'GAME', jp:'エヴォルヴォ',
+    img:'assets/image/works/evolvo-wide.webp', cover:'assets/image/works/evolvo-cover.webp', icon:'assets/image/works/evolvo-icon.webp',
+    coverPos:'center 42%', video:null, worlds:['bloom','reclaim'],
+    status:'IN DEVELOPMENT', phase:'Release candidate · App Store submission prep',
+    tagline:'Small creatures. Big evolution.',
+    platform:'iPhone', engine:'Godot 4.4',
+    link:'https://evolvo.mr5am.com/', linkLabel:'GAME SITE ↗',
+    links:[{ label:'GAME SITE ↗', href:'https://evolvo.mr5am.com/' }],
+    blurb:'A portrait creature-puzzle game. Swipe the whole 5 × 5 board to merge and position creatures, then let the ready ones attack on their own. Fifty handcrafted stages across Forest, Riverlands, Sunscorch, Frostlands and Storm Highlands; six creature families with six forms each; a permanent Biodome collection under painted glass. Built in Godot with native StoreKit, consumable battle tools and an endgame of five Epic Guardians.' },
+
+  { id:12, title:'AI Billionaires', type:'Idle Game · React · Capacitor', year:'2026', tag:'GAME', jp:'AI億万長者',
+    img:'assets/image/works/ai-billionaires-wide.webp', cover:'assets/image/works/ai-billionaires-cover.webp', icon:'assets/image/works/ai-billionaires-icon.webp',
+    coverPos:'center 38%', video:null, worlds:['core','beyond'],
+    status:'IN DEVELOPMENT', phase:'Web preview live · iPhone build in progress',
+    tagline:'An idle game about unreasonable ambition.',
+    platform:'Web · iPhone', engine:'React + TypeScript',
+    link:'https://aibillionaires.mr5am.com/', linkLabel:'GAME SITE ↗',
+    links:[{ label:'PLAY PREVIEW ↗', href:'https://aibillionaires.mr5am.com/play/' }, { label:'GAME SITE ↗', href:'https://aibillionaires.mr5am.com/' }],
+    blurb:'A satirical idle game: build the world\'s most valuable AI company with exactly one human employee. Start on a laptop in a bedroom, ship products that automate themselves, and climb through seven workspaces, from a garage to an orbital command penthouse, while the valuation runs past a trillion. The browser preview caps at a $1M valuation; the full, uncapped game ships as a mobile app.' },
+
+  { id:13, title:'Pocket Digger', type:'iPhone Game · Godot 4 · Mining Adventure', year:'2026', tag:'GAME', jp:'ポケットディガー',
+    img:'assets/image/works/pocket-digger-wide.webp', cover:'assets/image/works/pocket-digger-cover.webp', icon:'assets/image/works/pocket-digger-icon.webp',
+    coverPos:'center top', video:null, worlds:['reclaim','core'],
+    status:'IN DEVELOPMENT', phase:'Chapter 1 on the App Store · deeper regions underway',
+    tagline:'A cozy mining adventure for iPhone.',
+    platform:'iPhone', engine:'Godot 4.4',
+    link:'https://pocketdigger.mr5am.com/', linkLabel:'GAME SITE ↗',
+    links:[{ label:'APP STORE ↗', href:'https://apps.apple.com/app/id6821752180' }, { label:'GAME SITE ↗', href:'https://pocketdigger.mr5am.com/' }],
+    blurb:'Guide a small lamp-and-drill robot down from a surface workshop into a persistent, seeded underground: dig anywhere, light the dark with torches, dodge rockfall and cave critters, find relics and haul ore home for upgrades. Real-time tunnelling in the spirit of Terraria, a carry-it-home loop in the spirit of SteamWorld Dig, five regions with their own guardians, and a world that remembers every tunnel you cut.' },
 ];
+
+/* Fixed showcase order for the home "Now Building" section. The archive
+   shuffles per visit; the featured games should not. */
+const GAMES = WORKS_RAW.filter(w => w.tag === 'GAME');
 const WORKS = [...WORKS_RAW].sort((a,b) =>
   Math.sin(VISIT_SEED*a.id*9301+49297) - Math.sin(VISIT_SEED*b.id*9301+49297)
 );
+
+/* ── Persisted preferences ───────────────────────────────────────────────
+   Day/night used to be re-rolled on every load, so a visitor who picked a
+   theme lost it on refresh. A stored choice wins; with none, keep the roll. */
+const THEME_KEY = 'mr5am_theme';
+const readStoredTheme = () => {
+  try { const v = localStorage.getItem(THEME_KEY); return v === 'dark' ? true : v === 'light' ? false : null; }
+  catch (_) { return null; }
+};
+const storeTheme = (isDark) => { try { localStorage.setItem(THEME_KEY, isDark ? 'dark' : 'light'); } catch (_) {} };
+
+/* The full 3.6s film-wipe loader plays once per tab session; reloads and
+   back-navigation get a 1.6s version with the same choreography. */
+const LOADER_SEEN_KEY = 'mr5am_loader_seen';
+const loaderSeenThisSession = () => { try { return sessionStorage.getItem(LOADER_SEEN_KEY) === '1'; } catch (_) { return false; } };
+const markLoaderSeen = () => { try { sessionStorage.setItem(LOADER_SEEN_KEY, '1'); } catch (_) {} };
 
 /* ── Curated world galleries ────────────────────────────────────────────── */
 const WORLD_GALLERIES = {

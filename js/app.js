@@ -14,7 +14,14 @@ function App() {
   const [renderedRoute, setRenderedRoute] = useState(() => parseRouteFromPath(window.location.pathname));
   const [routeTransitionClass, setRouteTransitionClass] = useState('');
   const [mode, setMode] = useState(INITIAL_MODE);
-  const [isDark, setIsDark] = useState(() => Math.random() > 0.5);
+  // A stored day/night choice survives reloads; first-time visitors still get
+  // the random roll that makes each first impression different.
+  const [isDark, setIsDarkState] = useState(() => { const stored = readStoredTheme(); return stored === null ? Math.random() > 0.5 : stored; });
+  const setIsDark = (v) => setIsDarkState(prev => {
+    const next = typeof v === 'function' ? v(prev) : v;
+    storeTheme(next);
+    return next;
+  });
   const [tweaksOn, setTweaksOn] = useState(false);
   const [portalTarget, setPortalTarget] = useState(null);
   const pendingScrollRef = useRef(null);
@@ -181,9 +188,12 @@ function App() {
         <div className={`route-transition-shell ${routeTransitionClass}`.trim()}>
           {renderedRoute === HOME_ROUTE ? (
             <>
-              <WorldStateSelector isDark={isDark} onSelectRoute={handleWorldSelect} />
+              <WorldStateSelector isDark={isDark} mode={mode} onSelectRoute={handleWorldSelect} />
+              <GamesShowcase mode={mode} isDark={isDark} />
+              <WorksSection mode={mode} isDark={isDark} />
               <AboutSection name={name} mode={mode} isDark={isDark} />
               <ContactSection name={name} mode={mode} isDark={isDark} />
+              <Footer name={name} mode={mode} isDark={isDark} />
             </>
           ) : (
             <WorldStatePage worldKey={renderedRoute} isDark={isDark} onNavigate={navigateToRoute} />

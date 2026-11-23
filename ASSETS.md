@@ -40,6 +40,11 @@ Every visible asset on the site, where it appears, and what to edit.
 | 11 | World description copy | text only | `js/data.js` → `WORLD_DESCRIPTIONS[world]` |
 | 12 | World name + accent colors + JP phrases | config only | `js/data.js` → `MODES[world]` and `WORLD_ROUTE_META[world]` |
 | 13 | Curated extra gallery images (legacy / optional) | references `ART_IMGS` | `js/data.js` → `WORLD_GALLERIES[world]` (currently unused by world page) |
+| 14 | Home "Now Building" game cards (portrait cover) | `assets/image/works/<game>-cover.webp` (720w portrait store capture) | `js/data.js` → `WORKS_RAW[i].cover` on entries with `tag:'GAME'` |
+| 15 | Game archive card / overlay hero (wide crop) | `assets/image/works/<game>-wide.webp` (≥1140w landscape) | `js/data.js` → `WORKS_RAW[i].img` |
+| 16 | Game icon badge (card + overlay) | `assets/image/works/<game>-icon.webp` (192×192) | `js/data.js` → `WORKS_RAW[i].icon` |
+
+Game entries also carry `status` (chip), `phase` (one honest line on the build), `tagline`, `platform`, `engine`, and `links` (ordered real destinations; the first is the primary CTA). Current sources: EVOLVO covers come from `evolvo/captures/appstore/01-home.png`, AI Billionaires from `aibillion/docs/store/screenshots/04-reactor-current.png`, Pocket Digger from `pocketdigger/docs/site/assets/img/hero.webp` and `og.jpg`. Re-export with `sips`/`cwebp` when the games' store captures change.
 
 ---
 
