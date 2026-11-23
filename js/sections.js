@@ -739,7 +739,7 @@ function GamesShowcase({ mode, isDark }) {
             GAMES<br /><span style={{ WebkitTextStroke:`1px ${cfg.acc}`, color:'transparent' }}>IN THE MAKING</span>
           </h2>
           <div style={{ textAlign:'right' }}>
-            <div style={{ fontFamily:'Space Mono', fontSize:9, color:'var(--fg-faint)', letterSpacing:'.12em' }}>{GAMES.length} IN PROGRESS · MORE COMING</div>
+            <div style={{ fontFamily:'Space Mono', fontSize:9, color:'var(--fg-faint)', letterSpacing:'.12em' }}>{GAMES.length} GAMES · MORE COMING</div>
             <div style={{ fontFamily:'Noto Sans JP', fontWeight:900, fontSize:13, color:`${cfg.acc}55`, marginTop:2 }}>開発中</div>
           </div>
         </div>
