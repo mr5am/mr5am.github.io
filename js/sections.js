@@ -151,7 +151,10 @@ function WorldStatePage({ worldKey, isDark, onNavigate }) {
   const nextKey = worldOrder[(worldIdx + 1) % worldOrder.length];
   const heroVideo = WORLD_VIDEO[safeWorldKey] || null;
   const bodyCopy = WORLD_DESCRIPTIONS[safeWorldKey] ?? WORLD_DESCRIPTIONS.bloom ?? '';
-  const worldWorks = WORKS_RAW.filter(w => w.worlds.includes(safeWorldKey));
+  // World pages are visual states: art, motion and sound only. Apps and
+  // games live in the Now Building showcase and the archive instead.
+  const WORLD_EXCLUDED_TAGS = ['APP', 'GAME'];
+  const worldWorks = WORKS_RAW.filter(w => w.worlds.includes(safeWorldKey) && !WORLD_EXCLUDED_TAGS.includes(w.tag));
   const heroRef = useRef();
   const [overlayWork, setOverlayWork] = useState(null);
   const [vis, setVis] = useState(false);
